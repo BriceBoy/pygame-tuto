@@ -17,6 +17,7 @@ clock = pygame.time.Clock()
 
 car_img = pygame.image.load("car.png")
 car_width = car_img.get_width()
+car_height = car_img.get_height()
 
 def draw_obstacle(x, y, width, height, color):
     pygame.draw.rect(game_display, color, [x, y, width, height])
@@ -82,13 +83,17 @@ def game_loop():
 
         obstacle_y += obstacle_speed
 
+        if x > display_width - car_width or x < 0:
+            crash()
+
         if obstacle_y > display_height:
             obstacle_y = 0 - obstacle_height
             obstacle_x = random.randrange(0, display_width)
-
-        if x > display_width - car_width or x < 0:
-            crash()
         
+        if y < obstacle_y + obstacle_height and y + car_height > obstacle_y:
+            if (x > obstacle_x and x < obstacle_x + obstacle_width) or (x + car_width > obstacle_x and x + car_width < obstacle_x + obstacle_width):
+                crash()
+
         pygame.display.update()
         clock.tick(60)
 
