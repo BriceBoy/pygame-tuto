@@ -1,4 +1,5 @@
 import pygame
+import random
 import time
 
 pygame.init()
@@ -17,7 +18,10 @@ clock = pygame.time.Clock()
 car_img = pygame.image.load("car.png")
 car_width = car_img.get_width()
 
-def car(x, y):
+def draw_obstacle(x, y, width, height, color):
+    pygame.draw.rect(game_display, color, [x, y, width, height])
+
+def draw_car(x, y):
     game_display.blit(car_img, (x, y))
 
 def text_objects(text, font):
@@ -45,12 +49,19 @@ def game_loop():
 
     x_movement = 0
 
+    obstacle_x = random.randrange(0, display_width)
+    obstacle_y = -600
+    obstacle_speed = 7
+    obstacle_width = 100
+    obstacle_height = 100
+
     game_exit = False
 
     while not game_exit:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                game_exit = True
+                pygame.quit()
+                quit()
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
@@ -65,14 +76,20 @@ def game_loop():
         x += x_movement
 
         game_display.fill(white)
-        car(x, y)
+
+        draw_obstacle(obstacle_x, obstacle_y, obstacle_width, obstacle_height, red)
+        draw_car(x, y)
+
+        obstacle_y += obstacle_speed
+
+        if obstacle_y > display_height:
+            obstacle_y = 0 - obstacle_height
+            obstacle_x = random.randrange(0, display_width)
 
         if x > display_width - car_width or x < 0:
             crash()
-
+        
         pygame.display.update()
         clock.tick(60)
 
 game_loop()
-pygame.quit()
-quit()
