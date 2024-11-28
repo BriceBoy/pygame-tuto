@@ -9,7 +9,7 @@ display_height = 600
 
 black = (0, 0, 0)
 white = (255, 255, 255)
-red = (255, 0, 0)
+block_color = (53, 115, 255)
 
 game_display = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("A Bit Racey")
@@ -19,8 +19,13 @@ car_img = pygame.image.load("car.png")
 car_width = car_img.get_width()
 car_height = car_img.get_height()
 
-def draw_obstacle(x, y, width, height, color):
-    pygame.draw.rect(game_display, color, [x, y, width, height])
+def draw_score(score):
+    font = pygame.font.SysFont(None, 25)
+    text = font.render(f"Score : {score}", True, black)
+    game_display.blit(text, (0, 0))
+
+def draw_obstacle(x, y, width, height):
+    pygame.draw.rect(game_display, block_color, [x, y, width, height])
 
 def draw_car(x, y):
     game_display.blit(car_img, (x, y))
@@ -56,6 +61,8 @@ def game_loop():
     obstacle_width = 100
     obstacle_height = 100
 
+    score = 0
+
     game_exit = False
 
     while not game_exit:
@@ -78,8 +85,9 @@ def game_loop():
 
         game_display.fill(white)
 
-        draw_obstacle(obstacle_x, obstacle_y, obstacle_width, obstacle_height, red)
+        draw_obstacle(obstacle_x, obstacle_y, obstacle_width, obstacle_height)
         draw_car(x, y)
+        draw_score(score)
 
         obstacle_y += obstacle_speed
 
@@ -87,8 +95,11 @@ def game_loop():
             crash()
 
         if obstacle_y > display_height:
+            score += 1
             obstacle_y = 0 - obstacle_height
             obstacle_x = random.randrange(0, display_width)
+            obstacle_speed += 1
+            obstacle_width += score * 1.2
         
         if y < obstacle_y + obstacle_height and y + car_height > obstacle_y:
             if (x > obstacle_x and x < obstacle_x + obstacle_width) or (x + car_width > obstacle_x and x + car_width < obstacle_x + obstacle_width):
