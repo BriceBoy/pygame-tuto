@@ -64,6 +64,9 @@ class Car:
 
 black = (0, 0, 0)
 white = (255, 255, 255)
+red = (255, 0, 0)
+green = (0, 255, 0)
+
 
 display_width = 800
 display_height = 600
@@ -114,6 +117,27 @@ def crash():
     message_display("You crashed !")
 
 
+def game_intro():
+    intro = True
+    while intro:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        game_display.fill(white)
+        font = pygame.font.Font("freesansbold.ttf", 115)
+        intro_surface, intro_rectangle = text_objects("A Bit Racey", font)
+        intro_rectangle.center = ((display_width / 2), (display_height / 2))
+        game_display.blit(intro_surface, intro_rectangle)
+
+        pygame.draw.rect(game_display, green, (150, 425, 200, 75))
+        pygame.draw.rect(game_display, red, (450, 425, 200, 75))
+
+        pygame.display.update()
+        clock.tick(15)
+
+
 def game_loop():
     car = Car("car.png")
     obstacles = [Obstacle(-(display_height / 2)), Obstacle(-display_height)]
@@ -156,5 +180,5 @@ def game_loop():
         pygame.display.update()
         clock.tick(60)
 
-
+game_intro()
 game_loop()
