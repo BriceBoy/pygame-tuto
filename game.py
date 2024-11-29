@@ -2,42 +2,105 @@ import pygame
 import random
 import time
 
-pygame.init()
+
+class Obstacle:
+    SPEED = 7
+    WIDTH = 100
+    HEIGHT = 100
+    COLOR = (53, 115, 255)
+
+    def __init__(self, initial_y: int = 0) -> None:
+        self.speed = self.SPEED
+        self.width = self.WIDTH
+        self.height = self.HEIGHT
+        self.color = self.COLOR
+        self.x = random.randrange(0, display_width)
+        self.y = initial_y
+
+    def update(self):
+        self.y += self.speed
+
+    def leaved_screen(self) -> bool:
+        return self.y > display_height
+
+
+class Car:
+    HORIZONTAL_SPEED = 5
+
+    def __init__(self, img_filepath: str) -> None:
+        self.img = pygame.image.load(img_filepath)
+        self.width = self.img.get_width()
+        self.height = self.img.get_height()
+        self.x = (display_width * 0.5) - (self.width / 2)
+        self.y = display_height * 0.8
+
+    def is_crashed(self, obstacles: list[Obstacle]) -> bool:
+        if self.x + self.width < 0 or self.x > display_width:
+            return True
+
+        if any(self.__touch_obstacle(obstacle) for obstacle in obstacles):
+            return True
+
+        return False
+
+    def move_left(self) -> None:
+        self.x -= self.HORIZONTAL_SPEED
+
+    def move_right(self) -> None:
+        self.x += self.HORIZONTAL_SPEED
+
+    def __touch_obstacle(self, obstacle: Obstacle) -> bool:
+        if (
+            obstacle.y + obstacle.height >= self.y
+            and obstacle.y <= self.y + self.height
+        ):
+            return (
+                obstacle.x <= self.x <= obstacle.x + obstacle.width
+                or obstacle.x <= self.x + self.width <= obstacle.x + obstacle.width
+            )
+
+        return False
+
+
+black = (0, 0, 0)
+white = (255, 255, 255)
 
 display_width = 800
 display_height = 600
 
-black = (0, 0, 0)
-white = (255, 255, 255)
-block_color = (53, 115, 255)
-
+pygame.init()
 game_display = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("A Bit Racey")
 clock = pygame.time.Clock()
 
-car_img = pygame.image.load("car.png")
-car_width = car_img.get_width()
-car_height = car_img.get_height()
 
 def draw_score(score):
     font = pygame.font.SysFont(None, 25)
     text = font.render(f"Score : {score}", True, black)
     game_display.blit(text, (0, 0))
 
-def draw_obstacle(x, y, width, height):
-    pygame.draw.rect(game_display, block_color, [x, y, width, height])
 
-def draw_car(x, y):
-    game_display.blit(car_img, (x, y))
+def draw_obstacle(obstacle: Obstacle) -> None:
+    pygame.draw.rect(
+        game_display,
+        obstacle.color,
+        [obstacle.x, obstacle.y, obstacle.width, obstacle.height],
+    )
+
+
+def draw_car(car: Car) -> None:
+    game_display.blit(car.img, (car.x, car.y))
+
 
 def text_objects(text, font):
     text_surface = font.render(text, True, black)
     return text_surface, text_surface.get_rect()
 
+
 def message_display(message):
     font = pygame.font.Font("freesansbold.ttf", 115)
     message_surface, message_rectangle = text_objects(message, font)
-    message_rectangle.center = ((display_width/2), (display_height/2))
+    message_rectangle.center = ((display_width / 2), (display_height / 2))
     game_display.blit(message_surface, message_rectangle)
     pygame.display.update()
 
@@ -46,66 +109,52 @@ def message_display(message):
     # Restarts the game
     game_loop()
 
+
 def crash():
     message_display("You crashed !")
 
+
 def game_loop():
-    x = (display_width * 0.5) - car_width / 2
-    y = (display_height * 0.8)
-
-    x_movement = 0
-
-    obstacle_x = random.randrange(0, display_width)
-    obstacle_y = -600
-    obstacle_speed = 7
-    obstacle_width = 100
-    obstacle_height = 100
-
+    car = Car("car.png")
+    obstacles = [Obstacle(-(display_height / 2)), Obstacle(-display_height)]
     score = 0
 
-    game_exit = False
+    while True:
 
-    while not game_exit:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    x_movement = -5
-                if event.key == pygame.K_RIGHT:
-                    x_movement = 5
-
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    x_movement = 0
-
-        x += x_movement
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            car.move_left()
+        if keys[pygame.K_RIGHT]:
+            car.move_right()
 
         game_display.fill(white)
 
-        draw_obstacle(obstacle_x, obstacle_y, obstacle_width, obstacle_height)
-        draw_car(x, y)
+        for obstacle in obstacles:
+            draw_obstacle(obstacle)
+        draw_car(car)
         draw_score(score)
 
-        obstacle_y += obstacle_speed
+        for obstacle in obstacles:
+            obstacle.update()
 
-        if x > display_width - car_width or x < 0:
+        if car.is_crashed(obstacles):
             crash()
 
-        if obstacle_y > display_height:
+        obstacles_gone = [
+            obstacle for obstacle in obstacles if obstacle.leaved_screen()
+        ]
+        for obstacle in obstacles_gone:
+            obstacles.remove(obstacle)
+            obstacles.append(Obstacle())
             score += 1
-            obstacle_y = 0 - obstacle_height
-            obstacle_x = random.randrange(0, display_width)
-            obstacle_speed += 1
-            obstacle_width += score * 1.2
-        
-        if y < obstacle_y + obstacle_height and y + car_height > obstacle_y:
-            if (x > obstacle_x and x < obstacle_x + obstacle_width) or (x + car_width > obstacle_x and x + car_width < obstacle_x + obstacle_width):
-                crash()
 
         pygame.display.update()
         clock.tick(60)
+
 
 game_loop()
