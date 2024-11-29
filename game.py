@@ -89,7 +89,7 @@ def draw_obstacle(obstacle: Obstacle) -> None:
     pygame.draw.rect(
         game_display,
         obstacle.color,
-        [obstacle.x, obstacle.y, obstacle.width, obstacle.height]
+        [obstacle.x, obstacle.y, obstacle.width, obstacle.height],
     )
 
 
@@ -119,7 +119,15 @@ def crash():
     message_display("You crashed !")
 
 
-def button(text: str, x: int, y: int, width: int, height: int, inactive_color: tuple, active_color: tuple):
+def button(
+    text: str,
+    x: int,
+    y: int,
+    width: int,
+    height: int,
+    inactive_color: tuple,
+    active_color: tuple,
+):
     small_font = pygame.font.Font("freesansbold.ttf", 20)
 
     mouse = pygame.mouse.get_pos()
@@ -163,7 +171,6 @@ def game_loop():
     score = 0
 
     while True:
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -198,6 +205,7 @@ def game_loop():
 
         pygame.display.update()
         clock.tick(60)
+
 
 game_intro()
 game_loop()
