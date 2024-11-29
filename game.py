@@ -119,6 +119,21 @@ def crash():
     message_display("You crashed !")
 
 
+def button(text: str, x: int, y: int, width: int, height: int, inactive_color: tuple, active_color: tuple):
+    small_font = pygame.font.Font("freesansbold.ttf", 20)
+
+    mouse = pygame.mouse.get_pos()
+    mouse_x, mouse_y = mouse
+    if x <= mouse_x <= x + width and y <= mouse_y <= y + height:
+        pygame.draw.rect(game_display, active_color, (x, y, width, height))
+    else:
+        pygame.draw.rect(game_display, inactive_color, (x, y, width, height))
+
+    go_surface, go_rectangle = text_objects(text, small_font)
+    go_rectangle.center = (x + (width / 2), y + (height / 2))
+    game_display.blit(go_surface, go_rectangle)
+
+
 def game_intro():
     intro = True
     big_font = pygame.font.Font("freesansbold.ttf", 115)
@@ -135,25 +150,8 @@ def game_intro():
         title_rectangle.center = ((display_width / 2), (display_height / 2))
         game_display.blit(title_surface, title_rectangle)
 
-        mouse = pygame.mouse.get_pos()
-        mouse_x, mouse_y = mouse
-
-        if 150 <= mouse_x <= 150 + 200 and 425 <= mouse_y <= 500:
-            pygame.draw.rect(game_display, green, (150, 425, 200, 75))
-        else:
-            pygame.draw.rect(game_display, dark_green, (150, 425, 200, 75))
-        if 450 <= mouse_x <= 450 + 200 and 425 <= mouse_y <= 500:
-            pygame.draw.rect(game_display, red, (450, 425, 200, 75))
-        else:
-            pygame.draw.rect(game_display, dark_red, (450, 425, 200, 75))
-
-        go_surface, go_rectangle = text_objects("GO !", small_font)
-        go_rectangle.center = (150 + (200 / 2), 425 + (75 / 2))
-        game_display.blit(go_surface, go_rectangle)
-
-        quit_surface, quit_rectangle = text_objects("Quit !", small_font)
-        quit_rectangle.center = (450 + (200 / 2), 425 + (75 / 2))
-        game_display.blit(quit_surface, quit_rectangle)
+        button("Go !", 150, 425, 200, 75, dark_green, green)
+        button("Quit !", 450, 425, 200, 75, dark_red, red)
 
         pygame.display.update()
         clock.tick(15)
