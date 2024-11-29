@@ -64,6 +64,8 @@ class Car:
 
 black = (0, 0, 0)
 white = (255, 255, 255)
+dark_red = (200, 0, 0)
+dark_green = (0, 200, 0)
 red = (255, 0, 0)
 green = (0, 255, 0)
 
@@ -87,7 +89,7 @@ def draw_obstacle(obstacle: Obstacle) -> None:
     pygame.draw.rect(
         game_display,
         obstacle.color,
-        [obstacle.x, obstacle.y, obstacle.width, obstacle.height],
+        [obstacle.x, obstacle.y, obstacle.width, obstacle.height]
     )
 
 
@@ -119,6 +121,9 @@ def crash():
 
 def game_intro():
     intro = True
+    big_font = pygame.font.Font("freesansbold.ttf", 115)
+    small_font = pygame.font.Font("freesansbold.ttf", 20)
+
     while intro:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -126,13 +131,29 @@ def game_intro():
                 quit()
 
         game_display.fill(white)
-        font = pygame.font.Font("freesansbold.ttf", 115)
-        intro_surface, intro_rectangle = text_objects("A Bit Racey", font)
-        intro_rectangle.center = ((display_width / 2), (display_height / 2))
-        game_display.blit(intro_surface, intro_rectangle)
+        title_surface, title_rectangle = text_objects("A Bit Racey", big_font)
+        title_rectangle.center = ((display_width / 2), (display_height / 2))
+        game_display.blit(title_surface, title_rectangle)
 
-        pygame.draw.rect(game_display, green, (150, 425, 200, 75))
-        pygame.draw.rect(game_display, red, (450, 425, 200, 75))
+        mouse = pygame.mouse.get_pos()
+        mouse_x, mouse_y = mouse
+
+        if 150 <= mouse_x <= 150 + 200 and 425 <= mouse_y <= 500:
+            pygame.draw.rect(game_display, green, (150, 425, 200, 75))
+        else:
+            pygame.draw.rect(game_display, dark_green, (150, 425, 200, 75))
+        if 450 <= mouse_x <= 450 + 200 and 425 <= mouse_y <= 500:
+            pygame.draw.rect(game_display, red, (450, 425, 200, 75))
+        else:
+            pygame.draw.rect(game_display, dark_red, (450, 425, 200, 75))
+
+        go_surface, go_rectangle = text_objects("GO !", small_font)
+        go_rectangle.center = (150 + (200 / 2), 425 + (75 / 2))
+        game_display.blit(go_surface, go_rectangle)
+
+        quit_surface, quit_rectangle = text_objects("Quit !", small_font)
+        quit_rectangle.center = (450 + (200 / 2), 425 + (75 / 2))
+        game_display.blit(quit_surface, quit_rectangle)
 
         pygame.display.update()
         clock.tick(15)
